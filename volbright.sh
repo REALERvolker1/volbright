@@ -31,7 +31,7 @@ _notify () {
         #color="$GOOD_COLOR"
     fi
 
-    dunstify -r 2593 -t 1000 -a "$APPNAME" -u 'normal' -h "int:value:$value" -h "string:hlcolor:$color" -- "${icon} ${value}%"
+    notify-send -r 2593 -t 1000 -a "$APPNAME" -u 'normal' -h "int:value:$value" -h "string:hlcolor:$color" -- "${icon} ${value}%"
 }
 
 monitor_brightness () {
