@@ -15,6 +15,7 @@ URGENT_COLOR='#ff7800'
 CRITICAL_COLOR='#ed333b'
 
 APPNAME="vlk-brightness-audio-watcher"
+BIN_NAME="${0##*/}"
 
 _notify () {
     local icon="${1:?Error: Operation not specified}"
@@ -33,6 +34,18 @@ _notify () {
 
     notify-send -r 2593 -t 1000 -a "$APPNAME" -u 'normal' -h "int:value:$value" -h "string:hlcolor:$color" -- "${icon} ${value}%"
 }
+
+_instance_detect () {
+    local others="$(pidof -x "$BIN_NAME")"
+    if [[ "$(echo "$others" | tr ' ' '\n' | wc -l)" -gt 1 ]]; then
+        echo "Found multiple instances! Replacing all..."
+        for i in $others; do
+            [[ "$i" == "$$" ]] && echo "skipping self: $i" && continue
+            kill "$i" && echo "killed process $i"
+        done
+    fi
+}
+
 
 monitor_brightness () {
     [ ! -d "$BACKLIGHT_PATH" ] && echo "ERROR! backlight path '$BACKLIGHT_PATH' does not exist!" && print_help
@@ -98,6 +111,8 @@ monitor_keyboard () {
 monitor_volume () {
     local mute
     local volume
+    local previous_volume=''
+    local previous_mute=''
     local icon
 
     pactl subscribe | grep --line-buffered 'sink' | while read -r _unused_line; do
@@ -120,7 +135,21 @@ monitor_volume () {
             fi
         fi
 
-        _notify "$icon" "$volume" "$VOLUME_COLOR"
+        # Playing media causes an update on sinks
+        if ((volume == previous_volume)); then
+            if [[ "$mute" == "$previous_mute" ]]; then
+                continue
+            else
+                previous_mute="$mute"
+                [ -z "$previous_mute" ] && continue
+                _notify "$icon" "$volume" "$VOLUME_COLOR"
+            fi
+        else
+            previous_volume="$volume"
+            [ -z "$previous_volume" ] && continue
+            _notify "$icon" "$volume" "$VOLUME_COLOR"
+        fi
+
     done
 }
 
@@ -135,13 +164,14 @@ Example:
 \033[1m%s --brightness --volume\033[0m\twatches both monitor brightness and volume level
 
 If this is your first time running this, please modify the script to include the filepath to your keyboard and monitor backlight.
-" "$0" "$0"
+" "$BIN_NAME" "$BIN_NAME"
 }
 
 # support multiple monitoring
 run_brightness=0
 run_volume=0
 run_keyboard=0
+#run_volume_action=0
 for arg in "$@"; do
 
     case "$arg" in
@@ -151,6 +181,8 @@ for arg in "$@"; do
             run_volume=1
         ;; '--keyboard')
             run_keyboard=1
+        #;; '--volume-action='*)
+        #    run_volume_action=1
         ;; *)
             print_help
             exit 1
@@ -158,7 +190,17 @@ for arg in "$@"; do
     esac
 
 done
+
+# ppl need to feed it args!
+[ -z "${1:-}" ] && print_help && exit 1
+
+#((run_volume_action == 1)) && volume_action "$@"
+
+# no unnecessary instances
+((run_brightness == 1)) || ((run_volume == 1)) || ((run_keyboard == 1)) && _instance_detect
+
 ((run_brightness == 1)) && monitor_brightness &
 ((run_volume == 1)) && monitor_volume &
 ((run_keyboard == 1)) && monitor_keyboard &
+
 wait
