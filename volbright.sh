@@ -111,8 +111,10 @@ monitor_keyboard () {
 monitor_volume () {
     local mute
     local volume
-    local previous_volume=''
-    local previous_mute=''
+    local previous_mute="$(pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)')"
+    local previous_volume="$(pactl get-sink-volume @DEFAULT_SINK@ | \
+        grep -Po '[0-9]{1,3}(?=%)' | \
+        uniq | tr '\n' ' ')"
     local icon
 
     pactl subscribe | grep --line-buffered 'sink' | while read -r _unused_line; do
