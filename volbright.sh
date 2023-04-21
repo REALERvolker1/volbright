@@ -196,7 +196,8 @@ If this is your first time running this, please modify the script to include the
 run_brightness=0
 run_volume=0
 run_keyboard=0
-#run_volume_action=0
+run_help=0
+
 for arg in "$@"; do
 
     case "$arg" in
@@ -206,8 +207,6 @@ for arg in "$@"; do
             run_volume=1
         ;; '--keyboard')
             run_keyboard=1
-        #;; '--volume-action='*)
-        #    run_volume_action=1
         ;; *)
             print_help
             exit 1
@@ -218,8 +217,6 @@ done
 
 # ppl need to feed it args!
 [ -z "${1:-}" ] && print_help && exit 1
-
-#((run_volume_action == 1)) && volume_action "$@"
 
 # no unnecessary instances
 ((run_brightness == 1)) || ((run_volume == 1)) || ((run_keyboard == 1)) && _instance_detect
