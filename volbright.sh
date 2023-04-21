@@ -3,8 +3,8 @@
 set -eu
 
 # Modify these variables to match your system config
-BACKLIGHT_PATH='/sys/class/backlight/intel_backlightd'
-KEYBOARD_PATH='/sys/class/leds/asus::kbd_backlightd'
+BACKLIGHT_PATH='/sys/class/backlight/intel_backlight'
+KEYBOARD_PATH='/sys/class/leds/asus::kbd_backlight'
 
 # Customize these colors to be whatever you want
 BRIGHTNESS_COLOR='#ffffff'
@@ -208,15 +208,19 @@ for arg in "$@"; do
         ;; '--keyboard')
             run_keyboard=1
         ;; *)
-            print_help
-            exit 1
+            run_help=1
         ;;
     esac
 
 done
 
 # ppl need to feed it args!
-[ -z "${1:-}" ] && print_help && exit 1
+[ -z "${1:-}" ] && run_help=1
+
+if ((run_help == 1)); then
+    print_help
+    exit 1
+fi
 
 # no unnecessary instances
 ((run_brightness == 1)) || ((run_volume == 1)) || ((run_keyboard == 1)) && _instance_detect
