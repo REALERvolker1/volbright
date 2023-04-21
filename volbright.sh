@@ -108,20 +108,28 @@ monitor_keyboard () {
     done
 }
 
+__get_volume_mute () {
+    pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)'
+}
+
+__get_volume_levels () {
+    pactl get-sink-volume @DEFAULT_SINK@ | \
+        grep -Po '[0-9]{1,3}(?=%)' | \
+        uniq | tr '\n' ' '
+}
+
 monitor_volume () {
     local mute
     local volume
-    local previous_mute="$(pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)')"
-    local previous_volume="$(pactl get-sink-volume @DEFAULT_SINK@ | \
-        grep -Po '[0-9]{1,3}(?=%)' | \
-        uniq | tr '\n' ' ')"
+    local previous_mute
+    local previous_volume
     local icon
 
+    previous_mute="$(__get_volume_mute)"
+    previous_volume="$(__get_volume_levels)"
     pactl subscribe | grep --line-buffered 'sink' | while read -r _unused_line; do
-        mute="$(pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)')"
-        volume="$(pactl get-sink-volume @DEFAULT_SINK@ | \
-            grep -Po '[0-9]{1,3}(?=%)' | \
-            uniq | tr '\n' ' ')"
+        mute="$(__get_volume_mute)"
+        volume="$(__get_volume_levels)"
 
         if [[ "$mute" == 'yes' ]]; then
             icon='󰝟'
