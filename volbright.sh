@@ -2,19 +2,25 @@
 # script by vlk
 set -eu
 
+# Modify these variables to match your system config
 BACKLIGHT_PATH="${BACKLIGHT_PATH:-/sys/class/backlight/intel_backlight}"
 KEYBOARD_PATH="${KEYBOARD_PATH:-/sys/class/leds/asus::kbd_backlight}"
 
+# Customize these colors to be whatever you want
 BRIGHTNESS_COLOR='#ffffff'
 KEYBOARD_COLOR='#99c1f1'
 VOLUME_COLOR='#8ff0a4'
 
+# Level colors. These appear if your indicator is near max
 #GOOD_COLOR='#57e389'
 WARN_COLOR='#f8e45c'
 URGENT_COLOR='#ff7800'
 CRITICAL_COLOR='#ed333b'
 
+# Appname, feel free to change, but remember to change in your dunst overrides if you decide to do so
 APPNAME="vlk-brightness-audio-watcher"
+
+# Critical global variable, do not change
 BIN_NAME="${0##*/}"
 
 _notify () {
@@ -28,6 +34,8 @@ _notify () {
         color="$URGENT_COLOR"
     elif ((value >= 70)); then
         color="$WARN_COLOR"
+
+    # Levels again, add this level if you so desire
     #elif (($value >= 60)); then
         #color="$GOOD_COLOR"
     fi
@@ -36,7 +44,8 @@ _notify () {
 }
 
 _instance_detect () {
-    local others="$(pidof -x "$BIN_NAME")"
+    local others
+    others="$(pidof -x "$BIN_NAME")"
     if [[ "$(echo "$others" | tr ' ' '\n' | wc -l)" -gt 1 ]]; then
         echo "Found multiple instances! Replacing all..."
         for i in $others; do
