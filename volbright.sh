@@ -3,8 +3,8 @@
 set -eu
 
 # Modify these variables to match your system config
-BACKLIGHT_PATH="${BACKLIGHT_PATH:-/sys/class/backlight/intel_backlight}"
-KEYBOARD_PATH="${KEYBOARD_PATH:-/sys/class/leds/asus::kbd_backlight}"
+BACKLIGHT_PATH='/sys/class/backlight/intel_backlightd'
+KEYBOARD_PATH='/sys/class/leds/asus::kbd_backlightd'
 
 # Customize these colors to be whatever you want
 BRIGHTNESS_COLOR='#ffffff'
@@ -18,7 +18,7 @@ URGENT_COLOR='#ff7800'
 CRITICAL_COLOR='#ed333b'
 
 # Appname, feel free to change, but remember to change in your dunst overrides if you decide to do so
-APPNAME="vlk-brightness-audio-watcher"
+APPNAME='vlk-brightness-audio-watcher'
 
 # Critical global variable, do not change
 BIN_NAME="${0##*/}"
@@ -57,7 +57,10 @@ _instance_detect () {
 
 
 monitor_brightness () {
-    [ ! -d "$BACKLIGHT_PATH" ] && echo "ERROR! backlight path '$BACKLIGHT_PATH' does not exist!" && print_help
+    if [ ! -d "$BACKLIGHT_PATH" ]; then
+        echo "ERROR! backlight path '$BACKLIGHT_PATH' does not exist!"
+        return
+    fi
     local max_brightness
     local perc
     local brightness
@@ -90,7 +93,10 @@ monitor_brightness () {
 }
 
 monitor_keyboard () {
-    [ ! -d "$KEYBOARD_PATH" ] && echo "ERROR! keyboard path '$KEYBOARD_PATH' does not exist!" && print_help
+    if [ ! -d "$KEYBOARD_PATH" ]; then
+        echo "ERROR! keyboard path '$KEYBOARD_PATH' does not exist!"
+        return
+    fi
     local max_brightness
     local perc
     local brightness
