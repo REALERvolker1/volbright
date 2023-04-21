@@ -24,7 +24,7 @@ APPNAME='vlk-brightness-audio-watcher'
 BIN_NAME="${0##*/}"
 
 _notify () {
-    local icon="${1:?Error: Operation not specified}"
+    local icon="${1:-󰠗}"
     local value="${2// }"
     local color="${3:-#FFFFFF}"
 
@@ -203,12 +203,16 @@ for arg in "$@"; do
     case "$arg" in
         '--brightness')
             run_brightness=1
+
         ;; '--volume')
             run_volume=1
+
         ;; '--keyboard')
             run_keyboard=1
+
         ;; *)
             run_help=1
+
         ;;
     esac
 
