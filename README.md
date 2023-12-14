@@ -1,3 +1,5 @@
+This repository is archived. The current version of volbright is here in my [dotfiles](https://github.com/REALERvolker1/homescripts/blob/main/bin/volbright.sh)
+
 # volbright
 An event-driven shell script to show you your info ~
 
